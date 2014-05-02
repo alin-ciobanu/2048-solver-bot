@@ -107,6 +107,40 @@ APP
 
         };
 
+        var moveUp = function () {
+
+            for (var i = 0; i < thisService.boardSize; i++) {
+                var lastNonZeroIndex = -1;
+                var currentCompare = {
+                    index: -1,
+                    value: -1
+                };
+
+                for (var j = 0; j < thisService.boardSize; j++) {
+                    if (thisService.board[j][i] != AppSettings.constants.EMPTY) {
+                        if (thisService.board[j][i] == currentCompare.value) {
+                            thisService.board[currentCompare.index][i] *= 2;
+                            thisService.board[j][i] = AppSettings.constants.EMPTY;
+                        }
+                        currentCompare.value = thisService.board[j][i];
+                        currentCompare.index = j;
+                        lastNonZeroIndex = j;
+                    }
+                }
+
+                for (var j = 0; j < thisService.boardSize; j++) {
+                    while (thisService.board[j][i] == AppSettings.constants.EMPTY && j < lastNonZeroIndex) {
+                        for (var k = j; k < thisService.boardSize - 1; k++) {
+                            thisService.board[k][i] = thisService.board[k + 1][i];
+                        }
+                        thisService.board[thisService.boardSize - 1][i] = AppSettings.constants.EMPTY;
+                        lastNonZeroIndex--;
+                    }
+                }
+            }
+
+        };
+
         var moveRight = function () {
 
             for (var i = 0; i < thisService.boardSize; i++) {
@@ -142,6 +176,40 @@ APP
 
         };
 
+        var moveDown = function () {
+
+            for (var i = 0; i < thisService.boardSize; i++) {
+                var lastNonZeroIndex = -1;
+                var currentCompare = {
+                    index: -1,
+                    value: -1
+                };
+
+                for (var j = thisService.boardSize - 1; j >= 0; j--) {
+                    if (thisService.board[j][i] != AppSettings.constants.EMPTY) {
+                        if (thisService.board[j][i] == currentCompare.value) {
+                            thisService.board[currentCompare.index][i] *= 2;
+                            thisService.board[j][i] = AppSettings.constants.EMPTY;
+                        }
+                        currentCompare.value = thisService.board[j][i];
+                        currentCompare.index = j;
+                        lastNonZeroIndex = j;
+                    }
+                }
+
+                for (var j = thisService.boardSize - 1; j >= 0; j--) {
+                    while (thisService.board[j][i] == AppSettings.constants.EMPTY && j > lastNonZeroIndex) {
+                        for (var k = j; k > 0; k--) {
+                            thisService.board[k][i] = thisService.board[k - 1][i];
+                        }
+                        thisService.board[0][i] = AppSettings.constants.EMPTY;
+                        lastNonZeroIndex++;
+                    }
+                }
+            }
+
+        };
+
         thisService.move = function (direction) {
 
             switch(direction) {
@@ -152,6 +220,14 @@ APP
 
                 case AppSettings.constants.directions.LEFT:
                     moveLeft();
+                    break;
+
+                case AppSettings.constants.directions.UP:
+                    moveUp();
+                    break;
+
+                case AppSettings.constants.directions.DOWN:
+                    moveDown();
                     break;
 
             }
