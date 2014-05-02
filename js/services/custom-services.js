@@ -9,7 +9,7 @@ APP
         var settings = {};
 
         settings.boardSize = 4;
-        settings.initialTilesNo = 2;
+        settings.initialTilesNo = 10;
         settings.possibleAppearingTileValues = [
             {
                 value: 2,
@@ -21,7 +21,13 @@ APP
             }
         ];
         settings.constants = {
-            EMPTY: 0
+            EMPTY: 0,
+            directions: {
+                UP: 1,
+                DOWN: 2,
+                RIGHT: 3,
+                LEFT: 4
+             }
         };
 
         return settings;
@@ -35,18 +41,24 @@ APP
         thisService.board = [];
         thisService.boardSize = AppSettings.boardSize;
 
-        var initZero = function () {
+        for (var i = 0; i < thisService.boardSize; i++) {
+            thisService.board.push([]);
+            for (var j = 0; j < thisService.boardSize; j++) {
+                thisService.board[i].push(AppSettings.constants.EMPTY);
+            }
+        }
+
+        var reset = function () {
             for (var i = 0; i < AppSettings.boardSize; i++) {
-                thisService.board.push([]);
                 for (var j = 0; j < AppSettings.boardSize; j++) {
-                    thisService.board[i].push(AppSettings.constants.EMPTY);
+                    thisService.board[i][j] = AppSettings.constants.EMPTY;
                 }
             }
         };
 
         thisService.initBoard = function () {
 
-            initZero();
+            reset();
 
             var tilesSoFar = [];
 
@@ -56,6 +68,57 @@ APP
                 var posc = pos.col;
                 thisService.board[posl][posc] =
                     BoardUtilsService.randomTileValue(AppSettings.possibleAppearingTileValues);
+            }
+
+        };
+
+        var moveLeft = function () {
+
+            for (var i = 0; i < thisService.boardSize; i++) {
+                var line = thisService.board[i];
+                var lastNonZeroIndex = -1;
+                var currentCompare = {
+                    index: -1,
+                    value: -1
+                };
+
+                for (var j = 0; j < line.length; j++) {
+                    if (line[j] != AppSettings.constants.EMPTY) {
+                        if (line[j] == currentCompare.value) {
+                            line[currentCompare.index] *= 2;
+                            line[j] = AppSettings.constants.EMPTY;
+                        }
+                        currentCompare.value = line[j];
+                        currentCompare.index = j;
+                        lastNonZeroIndex = j;
+                    }
+                }
+
+                for (var j = 0; j < line.length; j++) {
+                    while (line[j] == AppSettings.constants.EMPTY && j < lastNonZeroIndex) {
+                        for (var k = j; k < line.length - 1; k++) {
+                            line[k] = line[k + 1];
+                        }
+                        line[line.length - 1] = AppSettings.constants.EMPTY;
+                        lastNonZeroIndex--;
+                    }
+                }
+            }
+
+        };
+
+        thisService.move = function (direction) {
+
+            switch(direction) {
+
+                case AppSettings.constants.directions.UP:
+                    moveUp();
+                    break;
+
+                case AppSettings.constants.directions.LEFT:
+                    moveLeft();
+                    break;
+
             }
 
         };
