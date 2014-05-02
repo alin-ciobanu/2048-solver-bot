@@ -107,12 +107,47 @@ APP
 
         };
 
+        var moveRight = function () {
+
+            for (var i = 0; i < thisService.boardSize; i++) {
+                var line = thisService.board[i];
+                var lastNonZeroIndex = -1;
+                var currentCompare = {
+                    index: -1,
+                    value: -1
+                };
+
+                for (var j = line.length - 1; j >= 0; j--) {
+                    if (line[j] != AppSettings.constants.EMPTY) {
+                        if (line[j] == currentCompare.value) {
+                            line[currentCompare.index] *= 2;
+                            line[j] = AppSettings.constants.EMPTY;
+                        }
+                        currentCompare.value = line[j];
+                        currentCompare.index = j;
+                        lastNonZeroIndex = j;
+                    }
+                }
+
+                for (var j = line.length - 1; j >= 0; j--) {
+                    while (line[j] == AppSettings.constants.EMPTY && j > lastNonZeroIndex) {
+                        for (var k = j; k >= 0; k--) {
+                            line[k] = line[k - 1];
+                        }
+                        line[0] = AppSettings.constants.EMPTY;
+                        lastNonZeroIndex++;
+                    }
+                }
+            }
+
+        };
+
         thisService.move = function (direction) {
 
             switch(direction) {
 
-                case AppSettings.constants.directions.UP:
-                    moveUp();
+                case AppSettings.constants.directions.RIGHT:
+                    moveRight();
                     break;
 
                 case AppSettings.constants.directions.LEFT:
@@ -167,6 +202,25 @@ APP
             }
 
             return randomTileValueReturned;
+
+        };
+
+        thisService.getEmptyPositions = function (board, size) {
+
+            var emptyPositions = [];
+
+            for (var i = 0; i < size; i++) {
+                for (var j = 0; j < size; j++) {
+                    if (board[i][j] == AppSettings.constants.EMPTY) {
+                        emptyPositions.push({
+                            line: i,
+                            col: j
+                        });
+                    }
+                }
+            }
+
+            return emptyPositions;
 
         };
 
