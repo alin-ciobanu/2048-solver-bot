@@ -74,6 +74,10 @@ APP
 
         };
 
+        thisService.checkGameOver = function () {
+            alert (BoardUtilsService.isGameOver(thisService.board, thisService.boardSize));
+        }
+
         thisService.move = function (direction) {
             BoardUtilsService.move(direction, thisService.board, thisService.boardSize);
         };
@@ -181,6 +185,40 @@ APP
 
         };
 
+        thisService.equalsBoard = function (board1, board2, size1, size2) {
+
+            if (size1 != size2) {
+                return false;
+            }
+
+            for (var i = 0; i < size1; i++) {
+                for (j = 0; j < size1; j++) {
+                    if (board1[i][j] != board2[i][j]) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+
+        }
+
+        thisService.isGameOver = function (board, size) {
+
+            var bCopy = thisService.matrixCopy(board, size);
+            for (var i in AppSettings.constants.directions) {
+                var direction = AppSettings.constants.directions[i];
+                thisService.move(direction, bCopy, size);
+                if (thisService.equalsBoard(board, bCopy, size, size)) {
+                    return true;
+                }
+                bCopy = thisService.matrixCopy(board, size);
+            }
+
+            return false;
+
+        }
+
         var moveLeft = function (board, size) {
 
             for (var i = 0; i < size; i++) {
@@ -239,7 +277,7 @@ APP
 
                 for (var j = 0; j < size; j++) {
                     while (board[j][i] == AppSettings.constants.EMPTY && j < lastNonZeroIndex) {
-                        for (var k = j; k < boardSize - 1; k++) {
+                        for (var k = j; k < size - 1; k++) {
                             board[k][i] = board[k + 1][i];
                         }
                         board[size - 1][i] = AppSettings.constants.EMPTY;
