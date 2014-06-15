@@ -9,7 +9,7 @@ APP
         var settings = {};
 
         settings.boardSize = 4;
-        settings.initialTilesNo = 10;
+        settings.initialTilesNo = 2;
         settings.possibleAppearingTileValues = [
             {
                 value: 2,
@@ -28,7 +28,7 @@ APP
                 RIGHT: 3,
                 LEFT: 4
              },
-            MAX_DEPTH: 6,
+            MAX_DEPTH: 4,
             INFINITY: 999999
         };
 
@@ -86,34 +86,64 @@ APP
             return 0;
         };
 
-        thisService.optimumNextMove = function (depth, board, size) {
+        thisService.optimumNextMove = function (depth, board, size, bestDir) {
 
             if (depth == 0) {
-                return evaluateBoard(board, size);
+                return {
+                    max: evaluateBoard(board, size),
+                    dir: bestDir
+                };
             }
 
-            var freePositions = BoardUtilsService.getEmptyPositions(board, size);
             var max = -AppSettings.constants.INFINITY;
 
-            for (var i = 0; i < freePositions.length; i++) {
-                var freePos = freePositions[i];
+            for (var i in AppSettings.constants.directions) {
+                var direction = AppSettings.constants.directions[i];
                 var newBoard = BoardUtilsService.matrixCopy(board, size);
+                BoardUtilsService.move(direction, newBoard, size);
+                var boardSnapshot = BoardUtilsService.matrixCopy(board, size);
                 var score;
-                BoardUtilsService.markAPosition(newBoard, BoardUtilsService.randomTileValue(), freePos);
-                for (var j in AppSettings.constants.directions) {
-                    var direction = AppSettings.constants.directions[j];
-                    var newBoardDirections = BoardUtilsService.matrixCopy(newBoard, size);
-                    BoardUtilsService.move(direction, newBoardDirections, size);
-                    score = thisService.optimumNextMove(depth - 1, newBoardDirections, size);
-                    if (score > max) {
-                        max = score;
+                if (!BoardUtilsService.equalsBoard(newBoard, boardSnapshot, size, size)) {
+                    var freePositions = BoardUtilsService.getEmptyPositions(newBoard, size);
+                    for (var i in freePositions) {
+                        BoardUtilsService.markAPosition(newBoard,
+                            BoardUtilsService.randomTileValue(AppSettings.possibleAppearingTileValues), freePositions[i]);
+                        score = thisService.optimumNextMove(depth - 1, newBoard, size, bestDir);
+                        BoardUtilsService.markAPosition(newBoard, AppSettings.constants.EMPTY, freePositions[i]);
+                        if (score.max > max) {
+                            max = score.max;
+                            bestDir = direction;
+                        }
                     }
                 }
             }
 
-            return max;
+            return {
+                max: max,
+                dir: bestDir
+            };
 
         };
+
+        thisService.solve = function () {
+
+            var i = 0;
+
+            while (!BoardUtilsService.isGameOver(thisService.board, thisService.boardSize)) {
+
+                var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
+                alert(next);
+                thisService.move(next.dir);
+
+                if (i == 5) {
+                    break;
+                }
+
+                i++;
+
+            }
+
+        }
 
         return thisService;
 
@@ -204,6 +234,14 @@ APP
         }
 
         thisService.isGameOver = function (board, size) {
+
+            for (var i = 0; i < size; i++) {
+                for (var j = 0; j < size; j++) {
+                    if (board[i][j] == AppSettings.constants.EMPTY) {
+                        return false;
+                    }
+                }
+            }
 
             var bCopy = thisService.matrixCopy(board, size);
             for (var i in AppSettings.constants.directions) {
