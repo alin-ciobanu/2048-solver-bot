@@ -28,7 +28,7 @@ APP
                 RIGHT: 3,
                 LEFT: 4
              },
-            MAX_DEPTH: 4,
+            MAX_DEPTH: 9,
             INFINITY: 999999
         };
 
@@ -36,12 +36,13 @@ APP
 
     })
 
-    .factory('BoardService', function (AppSettings, BoardUtilsService) {
+    .factory('BoardService', function (AppSettings, BoardUtilsService, $timeout, $rootScope) {
 
         var thisService = {};
 
         thisService.board = [];
         thisService.boardSize = AppSettings.boardSize;
+        thisService.moves = 0;
 
         for (var i = 0; i < thisService.boardSize; i++) {
             thisService.board.push([]);
@@ -86,6 +87,33 @@ APP
             return 0;
         };
 
+        thisService.worstRandomPosition = function (possibleAppearingTileValues, positions, board, size) {
+
+            var minScore = AppSettings.constants.INFINITY;
+            var worstPosition;
+
+            for (var i = 0; i < positions.length; i++) {
+                for (var j = 0; j < possibleAppearingTileValues.length; j++) {
+                    BoardUtilsService.markAPosition(board, possibleAppearingTileValues[j].value, positions[i]);
+                    var score = evaluateBoard(board, size);
+                    if (score < minScore) {
+                        minScore = score;
+                        worstPosition = {
+                            pos: {
+                                line: positions[i].line,
+                                col: positions[i].col
+                            },
+                            value: possibleAppearingTileValues[j].value
+                        };
+                    }
+                    BoardUtilsService.markAPosition(board, AppSettings.constants.EMPTY, positions[i]);
+                }
+            }
+
+            return worstPosition;
+
+        }
+
         thisService.optimumNextMove = function (depth, board, size, bestDir) {
 
             if (depth == 0) {
@@ -105,15 +133,14 @@ APP
                 var score;
                 if (!BoardUtilsService.equalsBoard(newBoard, boardSnapshot, size, size)) {
                     var freePositions = BoardUtilsService.getEmptyPositions(newBoard, size);
-                    for (var i in freePositions) {
-                        BoardUtilsService.markAPosition(newBoard,
-                            BoardUtilsService.randomTileValue(AppSettings.possibleAppearingTileValues), freePositions[i]);
-                        score = thisService.optimumNextMove(depth - 1, newBoard, size, bestDir);
-                        BoardUtilsService.markAPosition(newBoard, AppSettings.constants.EMPTY, freePositions[i]);
-                        if (score.max > max) {
-                            max = score.max;
-                            bestDir = direction;
-                        }
+                    var worstPosition = thisService.worstRandomPosition(AppSettings.possibleAppearingTileValues,
+                                                                        freePositions, newBoard, size);
+                    BoardUtilsService.markAPosition(newBoard, worstPosition.value, worstPosition.pos);
+                    score = thisService.optimumNextMove(depth - 1, newBoard, size, bestDir);
+                    BoardUtilsService.markAPosition(newBoard, AppSettings.constants.EMPTY, worstPosition.pos);
+                    if (score.max > max) {
+                        max = score.max;
+                        bestDir = direction;
                     }
                 }
             }
@@ -125,6 +152,19 @@ APP
 
         };
 
+        thisService.putRandomTile = function () {
+            BoardUtilsService.markAPosition(thisService.board,
+                BoardUtilsService.randomTileValue(AppSettings.possibleAppearingTileValues),
+                BoardUtilsService.randomEmptyPosition(thisService.board, thisService.boardSize));
+        }
+
+        thisService.doNextMove = function () {
+            var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
+            console.log(next, "nextMove", thisService.board);
+            thisService.move(next.dir);
+            thisService.putRandomTile();
+        }
+
         thisService.solve = function () {
 
             var i = 0;
@@ -132,10 +172,16 @@ APP
             while (!BoardUtilsService.isGameOver(thisService.board, thisService.boardSize)) {
 
                 var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
-                alert(next);
+                console.log(next, "nextMove", thisService.board);
                 thisService.move(next.dir);
+                thisService.putRandomTile();
+                thisService.moves++;
 
-                if (i == 5) {
+                $timeout(function() {
+                    $rootScope.$digest();
+                }, 0);
+
+                if (i == 4) {
                     break;
                 }
 
