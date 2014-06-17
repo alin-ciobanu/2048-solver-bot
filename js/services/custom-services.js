@@ -36,13 +36,12 @@ APP
 
     })
 
-    .factory('BoardService', function (AppSettings, BoardUtilsService, $timeout, $rootScope) {
+    .factory('BoardService', function (AppSettings, BoardUtilsService, $timeout, $rootScope, $compile) {
 
         var thisService = {};
 
         thisService.board = [];
         thisService.boardSize = AppSettings.boardSize;
-        thisService.moves = 0;
 
         for (var i = 0; i < thisService.boardSize; i++) {
             thisService.board.push([]);
@@ -152,42 +151,55 @@ APP
 
         };
 
+        var sleep = function (milliseconds) {
+            var start = new Date().getTime();
+            for (var i = 0; i < 1e7; i++) {
+                if ((new Date().getTime() - start) > milliseconds){
+                    break;
+                }
+            }
+        }
+
         thisService.putRandomTile = function () {
             BoardUtilsService.markAPosition(thisService.board,
                 BoardUtilsService.randomTileValue(AppSettings.possibleAppearingTileValues),
                 BoardUtilsService.randomEmptyPosition(thisService.board, thisService.boardSize));
+            sleep(500);
         }
 
         thisService.doNextMove = function () {
             var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
-            console.log(next, "nextMove", thisService.board);
             thisService.move(next.dir);
             thisService.putRandomTile();
         }
 
-        thisService.solve = function () {
+        thisService.doBestMove = function () {
+            var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
+            thisService.move(next.dir);
+        }
 
-            var i = 0;
+        thisService.solve = function (moveOrRandomTile) {
 
-            while (!BoardUtilsService.isGameOver(thisService.board, thisService.boardSize)) {
-
-                var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
-                console.log(next, "nextMove", thisService.board);
-                thisService.move(next.dir);
-                thisService.putRandomTile();
-                thisService.moves++;
-
-                $timeout(function() {
-                    $rootScope.$digest();
-                }, 0);
-
-                if (i == 4) {
-                    break;
-                }
-
-                i++;
-
+            if (BoardUtilsService.isGameOver(thisService.board, thisService.boardSize)) {
+                console.log("game over", thisService.board);
+                return;
             }
+
+            if (moveOrRandomTile == 'move') {
+                var next = thisService.optimumNextMove(AppSettings.constants.MAX_DEPTH, thisService.board, thisService.boardSize, -1);
+                thisService.move(next.dir);
+                $timeout(function() {
+                    thisService.solve('randomTile');
+                }, 0);
+            }
+            else {
+                thisService.putRandomTile();
+                $timeout(function() {
+                    thisService.solve('move');
+                }, 0);
+            }
+
+            return;
 
         }
 
@@ -483,4 +495,10 @@ APP
 
         return thisService;
 
-    });
+    })
+
+    .factory('DummyService', function (){
+        return {
+            dummy: 1
+        };
+    })

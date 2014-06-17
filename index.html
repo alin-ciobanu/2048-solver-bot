@@ -24,9 +24,10 @@
 
         <div class="above-game">
             <p class="game-intro">Let the bot join the numbers and get to the <strong>2048 tile!</strong></p>
-            <a class="game-intro">Moves <strong>{{boardService.moves}}</strong></p>
             <a class="restart-button" ng-click="boardService.initBoard()">Reset</a>
-            <a class="restart-button" ng-click="boardService.solve()">Solve</a>
+            <a class="restart-button" ng-click="boardService.solve('move')">Solve</a>
+            <a class="restart-button" ng-click="boardService.doBestMove()">Best</a>
+            <a class="restart-button" ng-click="boardService.putRandomTile()">Random</a>
         </div>
 
         <div class="game-container">
@@ -61,10 +62,10 @@
         </div>
     </div>
 
-    <script src="js/framework/angular.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/controllers/BoardController.js"></script>
-    <script src="js/services/custom-services.js"></script>
+    <script type="text/javascript" src="js/framework/angular.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript" src="js/controllers/BoardController.js"></script>
+    <script type="text/javascript" src="js/services/custom-services.js"></script>
 
 </body>
 </html>
