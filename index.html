@@ -23,11 +23,34 @@
         </div>
 
         <div class="above-game">
-            <p class="game-intro">Let the bot join the numbers and get to the <strong>2048 tile!</strong></p>
-            <a class="restart-button" ng-click="boardService.initBoard()">Reset</a>
-            <a class="restart-button" ng-click="boardService.solve('move')">Solve</a>
-            <a class="restart-button" ng-click="boardService.doBestMove()">Best</a>
-            <a class="restart-button" ng-click="boardService.putRandomTile()">Random</a>
+            <p class="game-intro">
+                Let the bot join the numbers and get to the <strong>2048 tile!</strong>
+                <br />
+                Hover the buttons to see what they do.
+            </p>
+            <a class="restart-button" ng-click="boardService.initBoard()"
+               title="Resets the game board. This also happens when the page is loaded for the first time.">
+                Reset
+            </a>
+            <a class="restart-button" ng-click="boardService.solve('move')"
+               title="Starts to solve the game. After you press this button, all you have to do is sit and watch.">
+                Solve
+            </a>
+            <a class="restart-button" ng-click="boardService.putRandomTile()"
+                title="Puts a random number on the board. As said before, could be used to simulate the game. Click Best, then Random. Repeat until game is over.">
+                Random
+            </a>
+            <a class="restart-button" ng-click="boardService.doBestMove()"
+               title="Performs the best move for the current board. Could be used together with Random button to simulate the game manually.">
+                Best
+            </a>
+        </div>
+
+        <div class="above-game">
+            <a class="restart-button" target="_blank" href="TestsRunner.html"
+               title="Performs unit tests using Jasmine on the AngularJS code.">
+                Tests
+            </a>
         </div>
 
         <div class="game-container">
@@ -57,7 +80,7 @@
             </p>
             <hr>
             <p>
-                Created by <a href="http://github.com/alin-ciobanu" target="_blank">Alin Ciobanu.</a>
+                Bot created by <a href="http://github.com/alin-ciobanu" target="_blank">Alin Ciobanu.</a>
             </p>
         </div>
     </div>
