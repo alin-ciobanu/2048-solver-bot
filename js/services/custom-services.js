@@ -42,6 +42,7 @@ APP
 
         thisService.board = [];
         thisService.boardSize = AppSettings.boardSize;
+        thisService.newTilesIndicatorMatrix = undefined;
 
         for (var i = 0; i < thisService.boardSize; i++) {
             thisService.board.push([]);
@@ -75,7 +76,8 @@ APP
         };
 
         thisService.move = function (direction) {
-            BoardUtilsService.move(direction, thisService.board, thisService.boardSize);
+            thisService.newTilesIndicatorMatrix = BoardUtilsService.move(direction, thisService.board, thisService.boardSize);
+            console.log(thisService.newTilesIndicatorMatrix);
         };
 
         var evaluateBoard = function (board, size) {
@@ -313,7 +315,21 @@ APP
 
         }
 
+        var getMatrixFilledWithValue = function (value, size) {
+            var matrix = [];
+            for (var i = 0; i < size; i++) {
+                var line = [];
+                for (var j = 0; j < size; j++) {
+                    line[j] = value;
+                }
+                matrix.push(line);
+            }
+            return matrix;
+        }
+
         var moveLeft = function (board, size) {
+
+            var newTilesIndicatorMatrix = getMatrixFilledWithValue(false, size);
 
             for (var i = 0; i < size; i++) {
                 var line = board[i];
@@ -327,6 +343,7 @@ APP
                     if (line[j] != AppSettings.constants.EMPTY) {
                         if (line[j] == currentCompare.value) {
                             line[currentCompare.index] *= 2;
+                            newTilesIndicatorMatrix[i][currentCompare.index] = true;
                             line[j] = AppSettings.constants.EMPTY;
                         }
                         currentCompare.value = line[j];
@@ -339,16 +356,22 @@ APP
                     while (line[j] == AppSettings.constants.EMPTY && j < lastNonZeroIndex) {
                         for (var k = j; k < line.length - 1; k++) {
                             line[k] = line[k + 1];
+                            newTilesIndicatorMatrix[i][k] = newTilesIndicatorMatrix[i][k + 1];
                         }
                         line[line.length - 1] = AppSettings.constants.EMPTY;
+                        newTilesIndicatorMatrix[i][line.length - 1] = false;
                         lastNonZeroIndex--;
                     }
                 }
             }
 
+            return newTilesIndicatorMatrix;
+
         };
 
         var moveUp = function (board, size) {
+
+            var newTilesIndicatorMatrix = getMatrixFilledWithValue(false, size);
 
             for (var i = 0; i < size; i++) {
                 var lastNonZeroIndex = -1;
@@ -361,6 +384,7 @@ APP
                     if (board[j][i] != AppSettings.constants.EMPTY) {
                         if (board[j][i] == currentCompare.value) {
                             board[currentCompare.index][i] *= 2;
+                            newTilesIndicatorMatrix[currentCompare.index][i] = true;
                             board[j][i] = AppSettings.constants.EMPTY;
                         }
                         currentCompare.value = board[j][i];
@@ -373,16 +397,22 @@ APP
                     while (board[j][i] == AppSettings.constants.EMPTY && j < lastNonZeroIndex) {
                         for (var k = j; k < size - 1; k++) {
                             board[k][i] = board[k + 1][i];
+                            newTilesIndicatorMatrix[k][i] = newTilesIndicatorMatrix[k + 1][i];
                         }
                         board[size - 1][i] = AppSettings.constants.EMPTY;
+                        newTilesIndicatorMatrix[size - 1][i] = false;
                         lastNonZeroIndex--;
                     }
                 }
             }
 
+            return newTilesIndicatorMatrix;
+
         };
 
         var moveRight = function (board, size) {
+
+            var newTilesIndicatorMatrix = getMatrixFilledWithValue(false, size);
 
             for (var i = 0; i < size; i++) {
                 var line = board[i];
@@ -396,6 +426,7 @@ APP
                     if (line[j] != AppSettings.constants.EMPTY) {
                         if (line[j] == currentCompare.value) {
                             line[currentCompare.index] *= 2;
+                            newTilesIndicatorMatrix[i][currentCompare.index] = true;
                             line[j] = AppSettings.constants.EMPTY;
                         }
                         currentCompare.value = line[j];
@@ -408,8 +439,10 @@ APP
                     while (line[j] == AppSettings.constants.EMPTY && j > lastNonZeroIndex) {
                         for (var k = j; k >= 0; k--) {
                             line[k] = line[k - 1];
+                            newTilesIndicatorMatrix[i][k] = newTilesIndicatorMatrix[i][k - 1];
                         }
                         line[0] = AppSettings.constants.EMPTY;
+                        newTilesIndicatorMatrix[i][line.length - 1] = false;
                         lastNonZeroIndex++;
                     }
                 }
@@ -418,6 +451,8 @@ APP
         };
 
         var moveDown = function (board, size) {
+
+            var newTilesIndicatorMatrix = getMatrixFilledWithValue(false, size);
 
             for (var i = 0; i < size; i++) {
                 var lastNonZeroIndex = -1;
@@ -430,6 +465,7 @@ APP
                     if (board[j][i] != AppSettings.constants.EMPTY) {
                         if (board[j][i] == currentCompare.value) {
                             board[currentCompare.index][i] *= 2;
+                            newTilesIndicatorMatrix[currentCompare.index][i] = true;
                             board[j][i] = AppSettings.constants.EMPTY;
                         }
                         currentCompare.value = board[j][i];
@@ -442,36 +478,44 @@ APP
                     while (board[j][i] == AppSettings.constants.EMPTY && j > lastNonZeroIndex) {
                         for (var k = j; k > 0; k--) {
                             board[k][i] = board[k - 1][i];
+                            newTilesIndicatorMatrix[k][i] = newTilesIndicatorMatrix[k - 1][i];
                         }
                         board[0][i] = AppSettings.constants.EMPTY;
+                        newTilesIndicatorMatrix[0][i] = false;
                         lastNonZeroIndex++;
                     }
                 }
             }
 
+            return newTilesIndicatorMatrix;
+
         };
 
         thisService.move = function (direction, board, size) {
 
+            var newTilesIndicatorMatrix;
+
             switch(direction) {
 
                 case AppSettings.constants.directions.RIGHT:
-                    moveRight(board, size);
+                    newTilesIndicatorMatrix = moveRight(board, size);
                     break;
 
                 case AppSettings.constants.directions.LEFT:
-                    moveLeft(board, size);
+                    newTilesIndicatorMatrix = moveLeft(board, size);
                     break;
 
                 case AppSettings.constants.directions.UP:
-                    moveUp(board, size);
+                    newTilesIndicatorMatrix = moveUp(board, size);
                     break;
 
                 case AppSettings.constants.directions.DOWN:
-                    moveDown(board, size);
+                    newTilesIndicatorMatrix = moveDown(board, size);
                     break;
 
             }
+
+            return newTilesIndicatorMatrix;
 
         };
 

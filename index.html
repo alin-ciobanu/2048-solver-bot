@@ -65,7 +65,9 @@
             <div class="tile-container">
                 <span ng-repeat="(indexRow, row) in boardService.board track by $index">
                     <span ng-repeat="(indexCol, cell) in row track by $index">
-                        <div ng-if="cell != 0" class="tile tile-{{cell}} tile-position-{{indexCol + 1}}-{{indexRow + 1}}">
+                        <div ng-if="cell != 0" class="tile tile-position-{{indexCol + 1}}-{{indexRow + 1}}"
+                             ng-class="[(cell > 2048) ? 'tile-super' : 'tile-{{cell}}',
+                             boardService.newTilesIndicatorMatrix[indexRow][indexCol] ? 'tile-merged' : '']">
                             <div class="tile-inner">
                                {{cell}}
                             </div>
