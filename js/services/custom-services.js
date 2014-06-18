@@ -74,10 +74,6 @@ APP
 
         };
 
-        thisService.checkGameOver = function () {
-            alert (BoardUtilsService.isGameOver(thisService.board, thisService.boardSize));
-        }
-
         thisService.move = function (direction) {
             BoardUtilsService.move(direction, thisService.board, thisService.boardSize);
         };
@@ -159,6 +155,8 @@ APP
                 }
             }
         }
+
+        thisService.sleepMilli = sleep;
 
         thisService.putRandomTile = function () {
             BoardUtilsService.markAPosition(thisService.board,
