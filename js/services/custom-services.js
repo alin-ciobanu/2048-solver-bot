@@ -305,13 +305,13 @@ APP
             for (var i in AppSettings.constants.directions) {
                 var direction = AppSettings.constants.directions[i];
                 thisService.move(direction, bCopy, size);
-                if (thisService.equalsBoard(board, bCopy, size, size)) {
-                    return true;
+                if (!thisService.equalsBoard(board, bCopy, size, size)) {
+                    return false;
                 }
                 bCopy = thisService.matrixCopy(board, size);
             }
 
-            return false;
+            return true;
 
         }
 
