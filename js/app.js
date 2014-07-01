@@ -3,4 +3,4 @@
  */
 'use strict'
 
-var APP = angular.module('2048-app', []);
+var APP = angular.module('2048-app', ['ngAnimate']);

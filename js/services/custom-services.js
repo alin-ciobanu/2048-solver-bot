@@ -81,7 +81,38 @@ APP
         };
 
         var evaluateBoard = function (board, size) {
-            return 0;
+
+            var score = 0;
+            var tileCurrent = board[0][0] * 2;
+
+            if (tileCurrent == 0) {
+                return 0;
+            }
+
+            for (var j = 0; j < size; j++) {
+
+                if (j % 2 == 0) {
+                    for (var i = 0; i < size; i++) {
+                        if (tileCurrent / 2 == board[i][j]) {
+                            score += tileCurrent;
+                            tileCurrent /= 2;
+                        }
+                    }
+                }
+
+                else {
+                    for (var i = size - 1; i >= 0; i--) {
+                        if (tileCurrent / 2 == board[i][j]) {
+                            score += tileCurrent;
+                            tileCurrent /= 2;
+                        }
+                    }
+                }
+
+            }
+
+            return score;
+
         };
 
         thisService.worstRandomPosition = function (possibleAppearingTileValues, positions, board, size) {
